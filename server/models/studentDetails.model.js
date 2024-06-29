@@ -129,7 +129,7 @@ const developmentHistorySchema = new mongoose.Schema({
 });
 
 const stdSchema = new mongoose.Schema({
-    regnNo: {
+    regNo: {
         type: String,
         unique: true,
         required: true
@@ -150,6 +150,7 @@ const stdSchema = new mongoose.Schema({
     occupation: { type: String },
     aadharNo: {
         type: Number,
+        unique: true,
         required: true,
     },
     paymentType: { type: String },

@@ -4,34 +4,29 @@ import { useCookies } from "react-cookie";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import image from './th.jpeg';
 
 export default function Home() {
   const navigate = useNavigate();
   const [cookies, setCookie, removeCookie] = useCookies([]);
-  const [students, setStudents] = useState([]);
+  const [students, setStudents] = useState({});
+  const teacherName = "John Doe";
 
   useEffect(() => {
-    getDetails();
+    // getDetails();
+    // Using static data for demonstration
+    const groupedStudents = {
+      101: [
+        { id: 1, name: "Student A" },
+        { id: 2, name: "Student B" }
+      ],
+      102: [
+        { id: 3, name: "Student C" },
+        { id: 4, name: "Student D" }
+      ]
+    };
+    setStudents(groupedStudents);
   }, []);
-
-  async function getDetails() {
-    try {
-      const response = await axios.post(
-        "http://localhost:4000/getassignedstudents",
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-      if (response.data.status) {
-        setStudents(response.data.data);
-      } else {
-        toast.error(response.data.message);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  }
 
   const logOut = () => {
     removeCookie("jwt");
@@ -40,51 +35,65 @@ export default function Home() {
     navigate("/");
   };
 
+  const Header = () => (
+    <header style={styles.header}>
+      <div style={styles.logo}>
+        <img src={image} alt="Logo" style={styles.logoImage} />
+        <span style={styles.logoLabel}>NIEPID</span>
+      </div>
+      <nav style={styles.navLinks}>
+        <button onClick={logOut} style={styles.button}>
+          Log out
+        </button>
+      </nav>
+    </header>
+  );
+
+  const Footer = () => (
+    <footer style={styles.footer}>&copy; 2024 Teacher Portal</footer>
+  );
+
   return (
     <>
       <ToastContainer />
       <div style={styles.container}>
-        <header style={styles.header}>
-          <div>Logo</div>
-          <nav style={styles.navLinks}>
-            <button onClick={logOut} style={styles.button}>
-              Log out
-            </button>
-          </nav>
-        </header>
+        <Header />
         <main style={styles.hero}>
-          <h1 style={styles.heroTitle}>Welcome to the Teacher Portal</h1>
+          <h2 style={styles.heroTitle}>Welcome to the Teacher Portal</h2>
           <p style={styles.heroSubtitle}>
             Manage your classes and students efficiently.
           </p>
-          {students.length > 0 ? (
-            <div style={styles.studentsContainer}>
-              <h3>Your Students</h3>
-              {students.map((student) => (
-                <div key={student} style={styles.student}>
-                  <p>{student}</p>
-                  <div>
-                    <button
-                      style={styles.studentButton}
-                      onClick={() => navigate(`eval/${student}`)}
-                    >
-                      Eval
-                    </button>
-                    <button
-                      style={styles.studentButton}
-                      onClick={() => navigate(`hist/${student}`)}
-                    >
-                      Hist
-                    </button>
+          <h3 style={styles.teacherInfo}>Welcome, {teacherName}!</h3>
+          {Object.keys(students).length > 0 ? (
+            Object.keys(students).map((classId) => (
+              <div key={classId} style={styles.classContainer}>
+                <h3>Class {classId}</h3>
+                {students[classId].map((student) => (
+                  <div key={student.id} style={styles.student}>
+                    <p>{student.name}</p>
+                    <div>
+                      <button
+                        style={styles.studentButton}
+                        onClick={() => navigate(`eval/`)}
+                      >
+                        Eval
+                      </button>
+                      <button
+                        style={styles.studentButton}
+                        onClick={() => navigate(`hist/`)}
+                      >
+                        Hist
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ))
           ) : (
             <p>No students registered under teacher</p>
           )}
         </main>
-        <footer style={styles.footer}>&copy; 2024 Teacher Portal</footer>
+        <Footer />
       </div>
     </>
   );
@@ -106,6 +115,18 @@ const styles = {
     backgroundColor: "#007bff",
     color: "#ffffff",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+  },
+  logo: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  logoImage: {
+    width: '40px',
+    height: '40px',
+    marginRight: '0.5rem',
+  },
+  logoLabel: {
+    fontSize: '1.5rem',
   },
   navLinks: {
     display: "flex",
@@ -130,6 +151,11 @@ const styles = {
     color: "#666666",
     marginBottom: "2rem",
   },
+  teacherInfo: {
+    fontSize: "1.2rem",
+    color: "#007bff",
+    marginBottom: "1rem",
+  },
   button: {
     padding: "0.8rem 1.5rem",
     fontSize: "1rem",
@@ -146,13 +172,14 @@ const styles = {
     backgroundColor: "#007bff",
     color: "#ffffff",
   },
-  studentsContainer: {
+  classContainer: {
     width: "100%",
     maxWidth: "800px",
     backgroundColor: "#ffffff",
     padding: "2rem",
     boxShadow: "0 10px 20px rgba(0, 0, 0, 0.2)",
     borderRadius: "10px",
+    marginBottom: "2rem",
   },
   student: {
     padding: "1rem",

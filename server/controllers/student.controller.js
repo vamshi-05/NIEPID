@@ -21,13 +21,14 @@ const viewEvaluation=async(req,res)=>{
 }
 
 const viewDetails=async(req,res)=>{
-    try{
-        
-
-    }
-    catch(error){
-        res.status(404).send(false)
-    }
+    try {
+        const userId = req.params.id;
+        //console.log(userId)
+        const details = await studentDetailsModel.findOne({regnNo : userId});
+        res.status(200).json({status : "success",details});
+      } catch (error) {
+        res.json(" error");
+      }
 }
 
 

@@ -10,6 +10,16 @@ import Teacher from "./pages/Teacher";
 import Principle from "./pages/Principle";
 import Student from "./pages/Student";
 import StudentEval from "./pages/StudentEval";
+import ViewTeachers from "./pages/ViewTeachers";
+import ViewStudents from "./pages/ViewStudents";
+import Front from "./pages/evaluate/Front";
+import Personal from "./pages/evaluate/Personal";
+import Social from "./pages/evaluate/Social";
+import Recreational from "./pages/evaluate/Recreational";
+import Occupational from "./pages/evaluate/Occupational";
+import Academic from "./pages/evaluate/Academic";
+
+
 import "react-toastify/dist/ReactToastify.css";
 import Class from "./pages/Class";
 import StudentHistory from "./pages/StudentHistory";
@@ -32,6 +42,8 @@ export default function App() {
             <Route element={<AdminPrivateRoute />}>
                 <Route exact path="/admin" element={<Admin />} />
                 <Route exact path="/admin/addstudents" element={<AddStudents />} />
+                <Route exact path="/admin/viewteachers" element={<ViewTeachers />} />
+                <Route exact path="/admin/viewstudents" element={<ViewStudents />} />
         
             </Route>
             <Route element={<StudentPrivateRoute />}>
@@ -40,6 +52,12 @@ export default function App() {
             </Route>
             <Route element={<TeacherPrivateRoute />}>
                 <Route exact path="/teacher" element={<Teacher />} />
+                <Route exact path="/teacher/eval" element={<Front />} />
+                <Route exact path="/teacher/eval/personal" element={<Personal />} />
+                <Route exact path="/teacher/eval/social" element={<Social />} />
+                <Route exact path="/teacher/eval/occupational" element={<Occupational />} />
+                <Route exact path="/teacher/eval/recreational" element={<Recreational />} />
+                <Route exact path="/teacher/eval/academic" element={<Academic />} />
         
             </Route>
             <Route element={<PrinciplePrivateRoute />}>
@@ -56,3 +74,14 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
+
+
+/* 
+  In every axios call mention 
+
+  headers: {
+              "Content-Type": "application/json",
+              Authorization: Bearer ${localStorage.getItem("token")},
+            },
+*/

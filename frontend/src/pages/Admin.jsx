@@ -4,7 +4,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import 'react-toastify/dist/ReactToastify.css';
-
+import image from './th.jpeg';
 
 function App() {
     const [isAdmin, setIsAdmin] = useState(false); // This state will determine whether to show Admin or Home component
@@ -16,27 +16,6 @@ function App() {
     const [uploadStatus, setUploadStatus] = useState('');
     const navigate = useNavigate();
     const [cookies, setCookie, removeCookie] = useCookies([]);
-
-    //useEffect(() => {
-    //     const verifyUser = async () => {
-    //         if (!cookies.jwt) {
-    //             navigate('/login');
-    //         } else {
-    //             const { data } = await axios.post(
-    //                 'http://localhost:4000/admin/',
-    //                 {},
-    //                 {
-    //                     withCredentials: true,
-    //                 }
-    //             );
-    //             if (!data.status) {
-    //                 toast.error(data.message);
-    //                 navigate('/');
-    //             }
-    //         }
-    //     };
-    //     verifyUser();
-    // }, [cookies, navigate]);
 
     const handleFileChange = (e) => {
         setSelectedFile(e.target.files[0]);
@@ -86,20 +65,33 @@ function App() {
 
     const handleDownloadTeachers = async () => {
         try {
-            const response = await axios.get('http://localhost:4000/downloadteachers', {
-                responseType: 'blob',
-                withCredentials: true,
+            console.log("Attempting to download file");
+            console.log(`Bearer ${localStorage.getItem("token")}`);
+    
+            const response = await axios.get('http://localhost:4000/admin/download', {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                responseType: 'blob', // Important
+                maxRedirects: 0, // Do not follow redirects
             });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'teachers.xlsx');
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
+    
+            // Check if the response status is 200 OK
+            if (response.status === 200) {
+                // Create a URL for the file
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'sampleDataTeacher.xlsx'); // Change 'sampleDataTeacher.xlsx' to the name you want
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link); // Cleanup the DOM
+            } else {
+                console.error(`Unexpected response status: ${response.status}`);
+            }
         } catch (error) {
-            console.error('Error downloading file:', error);
+            console.error('Error downloading the file', error);
         }
     };
 
@@ -126,26 +118,25 @@ function App() {
     const handleNavigateToStudentRegistration = () => {
         navigate('/admin/addstudents');
     };
+    const handleViewTeachers = () => {
+        navigate('/admin/viewteachers');
+    };
+    const handleViewStudents = () => {
+        navigate('/admin/viewstudents');
+    };
 
     return (
         <div style={styles.container}>
             <header style={styles.header}>
-                <div style={{ fontSize: '1.5rem' }}>Logo</div>
-                <nav style={styles.navLinks}>
-                    <a href="/about" style={styles.navLink}>
-                        About
-                    </a>
-                    <a href="/services" style={styles.navLink}>
-                        Services
-                    </a>
-                    <a href="/contact" style={styles.navLink}>
-                        Contact
-                    </a>
-                </nav>
-                <button onClick={handleLogout} style={styles.button}>
+                <div style={styles.logo}>
+                    <img src={image} alt="Logo" style={styles.logoImage} />
+                    <span style={styles.logoLabel}>NIEPID</span>
+                </div>
+                <button onClick={handleLogout} style={styles.b1}>
                     Logout
                 </button>
             </header>
+
             <div style={styles.hero}>
                 <h1 style={styles.heroTitle}>Welcome to Our Website</h1>
                 <p style={styles.heroSubtitle}>
@@ -154,44 +145,44 @@ function App() {
             </div>
 
             <div style={styles.adminContainer}>
-                <div
-                    style={styles.halfContainer}
-                    onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                >
+                <div style={styles.halfContainer}>
                     <h1 style={styles.h1}>Teachers</h1>
                     <form onSubmit={handleRegister} style={styles.formGroup}>
-                        <div style={styles.formGroup}>
-                            <label style={styles.label}>Upload Excel File:</label>
-                            <input
-                                type="file"
-                                onChange={handleFileChange}
-                                style={styles.input}
-                            />
-                        </div>
-                        <div style={styles.formGroup}>
-                            <button type="submit" style={styles.button}>
-                                Register
-                            </button>
-                        </div>
-                        <div style={styles.formGroup}>
-                            <button
-                                type="button"
-                                onClick={handleDownloadTeachers}
-                                style={styles.button}
-                            >
-                                Download Spreadsheet
-                            </button>
-                            <p style={{ textAlign: 'left' }}>Download Spreadsheet</p>
-                        </div>
-                        <div style={styles.formGroup}>
-                            <button
-                                type="button"
-                                onClick={() => alert('View button clicked')}
-                                style={styles.button}
-                            >
-                                View
-                            </button>
+                        <div style={styles.buttonContainer}>
+                            <div style={styles.buttonWrapper}>
+                                <button
+                                    type="button"
+                                    onClick={() => handleViewTeachers()}
+                                    style={styles.button}
+                                >
+                                    View
+                                </button>
+                                <p style={styles.buttonDescription}>View registered teachers.</p>
+                            </div>
+                            <div style={styles.buttonWrapper}>
+                                <button
+                                    type="button"
+                                    onClick={handleDownloadTeachers}
+                                    style={styles.button}
+                                >
+                                    Download Spreadsheet
+                                </button>
+                                <p style={styles.buttonDescription}>Download the teacher spreadsheet.</p>
+                            </div>
+                            <div style={styles.buttonWrapper}>
+                                <label style={styles.label}>Upload Excel File:</label>
+                                <input
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    style={styles.input}
+                                />
+                            </div>
+                            <div style={styles.buttonWrapper}>
+                                <button type="submit" style={styles.button}>
+                                    Register
+                                </button>
+                                <p style={styles.buttonDescription}>Upload and register new teachers.</p>
+                            </div>
                         </div>
                         {uploadStatus && (
                             <p style={styles.uploadStatus}>{uploadStatus}</p>
@@ -199,21 +190,29 @@ function App() {
                     </form>
                 </div>
 
-                <div
-                    style={styles.halfContainer}
-                    onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                >
+                <div style={styles.halfContainer}>
                     <h1 style={styles.h1}>Students</h1>
-                    <div style={styles.formGroup}>
-                        <label style={styles.label}>Register Student:</label>
-                        <button
-                            type="button"
-                            onClick={handleNavigateToStudentRegistration}
-                            style={styles.button}
-                        >
-                            Register
-                        </button>
+                    <div style={styles.buttonContainer}>
+                        <div style={styles.buttonWrapper}>
+                            <button
+                                type="button"
+                                onClick={handleNavigateToStudentRegistration}
+                                style={styles.button}
+                            >
+                                Register
+                            </button>
+                            <p style={styles.buttonDescription}>Navigate to student registration page.</p>
+                        </div>
+                        <div style={styles.buttonWrapper}>
+                            <button
+                                type="button"
+                                onClick={() => handleViewStudents()}
+                                style={styles.button}
+                            >
+                                View
+                            </button>
+                            <p style={styles.buttonDescription}>View registered students.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -226,142 +225,158 @@ function App() {
         </div>
     );
 }
-
-
 const styles = {
-  container: {
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      backgroundColor: '#f0f8ff',
-  },
-  header: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '1rem 2rem',
-      backgroundColor: '#007bff',
-      color: '#ffffff',
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  },
-  navLinks: {
-      display: 'flex',
-      gap: '1.5rem',
-  },
-  navLink: {
-      color: '#ffffff',
-      textDecoration: 'none',
-      fontSize: '1rem',
-      transition: 'color 0.3s',
-  },
-  navLinkHover: {
-      color: '#cccccc',
-  },
-  hero: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexGrow: 1,
-      padding: '2rem',
-      textAlign: 'center',
-  },
-  heroTitle: {
-      fontSize: '3rem',
-      color: '#333333',
-      marginBottom: '1rem',
-  },
-  heroSubtitle: {
-      fontSize: '1.5rem',
-      color: '#666666',
-      marginBottom: '2rem',
-  },
-  button: {
-      padding: '0.8rem 1.5rem',
-      fontSize: '1rem',
-      backgroundColor: '#007bff',
-      color: '#ffffff',
-      border: 'none',
-      borderRadius: '5px',
-      cursor: 'pointer',
-      transition: 'background-color 0.3s, transform 0.3s',
-  },
-  buttonHover: {
-      backgroundColor: '#0056b3',
-      transform: 'scale(1.05)',
-  },
-  footer: {
-      textAlign: 'center',
-      padding: '1rem',
-      backgroundColor: '#007bff',
-      color: '#ffffff',
-  },
-  adminContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      padding: '2rem',
-      background: '#f0f8ff',
-      alignItems: 'center',
-  },
-  halfContainer: {
-      flex: '0 0 45%',
-      backgroundColor: '#ffffff',
-      padding: '2rem',
-      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)',
-      borderRadius: '10px',
-      marginBottom: '5rem',
-      transition: 'transform 0.3s',
-  },
-  h1: {
-      marginBottom: '1.5rem',
-      color: '#333333',
-      fontSize: '2rem',
-      textAlign: 'center',
-  },
-  formGroup: {
-      marginBottom: '1rem',
-      textAlign: 'left',
-  },
-  label: {
-      fontSize: '1rem',
-      color: '#555555',
-      display: 'block',
-      marginBottom: '0.5rem',
-  },
-  input: {
-      padding: '0.8rem',
-      fontSize: '1rem',
-      border: '1px solid #cccccc',
-      borderRadius: '5px',
-      width: '100%',
-      boxSizing: 'border-box',
-      transition: 'border-color 0.3s, box-shadow 0.3s',
-      marginTop: '0.5rem',
-  },
-  inputFocus: {
-      borderColor: '#007bff',
-      boxShadow: '0 0 5px rgba(0, 123, 255, 0.5)',
-  },
-  select: {
-      padding: '0.8rem',
-      fontSize: '1rem',
-      border: '1px solid #cccccc',
-      borderRadius: '5px',
-      width: '100%',
-      boxSizing: 'border-box',
-      transition: 'border-color 0.3s, box-shadow 0.3s',
-      marginTop: '0.5rem',
-  },
-  selectFocus: {
-      borderColor: '#007bff',
-      boxShadow: '0 0 5px rgba(0, 123, 255, 0.5)',
-  },
-  uploadStatus: {
-      marginTop: '1rem',
-      color: '#ff0000',
-  },
+    container: {
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        backgroundColor: '#f0f8ff',
+    },
+    header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'right',
+        padding: '1rem 2rem',
+        backgroundColor: '#007bff',
+        color: '#ffffff',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    },
+    logo: {
+        display: 'flex',
+        alignItems: 'center',
+    },
+    logoImage: {
+        width: '40px',
+        height: '40px',
+        marginRight: '0.5rem',
+    },
+    logoLabel: {
+        fontSize: '1.5rem',
+    },
+    navLinks: {
+        display: 'flex',
+        gap: '1.5rem',
+    },
+    navLink: {
+        color: '#ffffff',
+        textDecoration: 'none',
+        fontSize: '1rem',
+        transition: 'color 0.3s',
+    },
+    navLinkHover: {
+        color: '#cccccc',
+    },
+    hero: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexGrow: 1,
+        padding: '2rem',
+        textAlign: 'center',
+    },
+    heroTitle: {
+        fontSize: '3rem',
+        color: '#333333',
+        marginBottom: '1rem',
+    },
+    heroSubtitle: {
+        fontSize: '1.5rem',
+        color: '#666666',
+        marginBottom: '2rem',
+    },
+    button: {
+        padding: '0.8rem 1.5rem',
+        fontSize: '1rem',
+        backgroundColor: '#007bff',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s, transform 0.3s',
+        margin: '0.5rem',
+        width: '100%',
+    },
+    buttonHover: {
+        backgroundColor: '#0056b3',
+        transform: 'scale(1.05)',
+    },
+    footer: {
+        textAlign: 'center',
+        padding: '1rem',
+        backgroundColor: '#007bff',
+        color: '#ffffff',
+    },
+    adminContainer: {
+        display: 'flex',
+        justifyContent: 'space-around',
+        padding: '2rem',
+        backgroundColor: '#f0f8ff',
+    },
+    halfContainer: {
+        flex: '1 1 45%',
+        backgroundColor: '#ffffff',
+        padding: '2rem',
+        borderRadius: '10px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        margin: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+    h1: {
+        fontSize: '2rem',
+        marginBottom: '1rem',
+    },
+    formGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: '1rem',
+        width: '100%',
+    },
+    label: {
+        fontSize: '1rem',
+        marginBottom: '0.5rem',
+    },
+    input: {
+        padding: '0.5rem',
+        fontSize: '1rem',
+        borderRadius: '5px',
+        border: '1px solid #ccc',
+        width: '100%',
+    },
+    buttonContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        width: '100%',
+    },
+    buttonWrapper: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginBottom: '1rem',
+        width: '100%',
+    },
+    buttonDescription: {
+        fontSize: '0.9rem',
+        color: '#666',
+        textAlign: 'center',
+        marginTop: '0.5rem',
+    },
+    uploadStatus: {
+        color: '#ff0000',
+        marginTop: '1rem',
+        textAlign: 'center',
+    },
+    b1: {
+        fontSize: '0.9rem',
+        color: '#666',
+        textAlign: 'center',
+        marginTop: '0.5rem',
+
+    },
 };
 
 
